@@ -361,34 +361,6 @@ screenshots/verification-success.png
 ```text
 screenshots/verification-failed.png
 ```
-
----
-
-# 🏷 GitHub Topics
-
-```text
-biometrics
-face-recognition
-facial-verification
-identity-verification
-insightface
-buffalo-l
-onnxruntime
-computer-vision
-opencv
-numpy
-deep-learning
-machine-learning
-artificial-intelligence
-python
-desktop-application
-tkinter
-security
-authentication
-cosine-similarity
-biometric-authentication
-```
-
 ---
 
 Developed with:

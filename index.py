@@ -1,58 +1,68 @@
+import logging
+from typing import Optional
 import cv2
-import numpy as np
 from insightface.app import FaceAnalysis
+import numpy as np
 
 
-def get_face_embedding(face_analyzer, image_path):
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+
+def initialize_face_analyzer(model_name: str = "buffalo_l", ctx_id: int = 0, det_size: tuple = (640, 640)) -> FaceAnalysis:
+    """Initializes and prepares the InsightFace FaceAnalysis application."""
+    try:
+        app = FaceAnalysis(name=model_name)
+        app.prepare(ctx_id=ctx_id, det_size=det_size)
+        return app
+    except Exception as e:
+        logging.error(f"Failed to initialize FaceAnalysis: {e}")
+        raise
+
+def get_face_embedding(app: FaceAnalysis, image_path: str) -> Optional[np.ndarray]:
+    """Loads an image and extracts the embedding of the first detected face."""
     img = cv2.imread(image_path)
-
     if img is None:
-        raise FileNotFoundError(f"Cannot load image: {image_path}")
+        logging.error(f"Could not read image from path: {image_path}")
+        return None
 
-    faces = face_analyzer.get(img)
-
+    faces = app.get(img)
     if not faces:
-        raise ValueError(f"No face detected in {image_path}")
+        logging.warning(f"No faces detected in image: {image_path}")
+        return None
+
+
+    return faces[0].embedding
+
+def calculate_face_distance(emb1: np.ndarray, emb2: np.ndarray) -> float:
+    """Calculates the Euclidean distance between two face embeddings."""
+    return float(np.linalg.norm(emb1 - emb2))
+
+def main():
+  
+    img1_path = "person1.webp"
+    img2_path = "person2.webp"
+
+    
+    logging.info("Initializing FaceAnalysis model...")
+    fa = initialize_face_analyzer()
+
+
+    logging.info("Extracting face embeddings...")
+    embedding_a = get_face_embedding(fa, img1_path)
+    embedding_b = get_face_embedding(fa, img2_path)
 
    
-    face = max(
-        faces,
-        key=lambda f: (f.bbox[2] - f.bbox[0]) * (f.bbox[3] - f.bbox[1])
-    )
+    if embedding_a is not None and embedding_b is not None:
+        distance = calculate_face_distance(embedding_a, embedding_b)
+        logging.info(f"Face comparison complete.")
+        print(f"\n[RESULT] Euclidean Distance: {distance:.4f}")
+        
+       
+        if distance < 1.2:
+            print("[RESULT] Match Status: Same Person")
+        else:
+            print("[RESULT] Match Status: Different People")
+    else:
+        logging.error("Face verification failed due to missing embeddings.")
 
-    return face.embedding
-
-
-def cosine_similarity(a, b):
-    return np.dot(a, b) / (
-        np.linalg.norm(a) * np.linalg.norm(b)
-    )
-
-
-
-fa = FaceAnalysis(name="buffalo_l")
-fa.prepare(ctx_id=0, det_size=(640, 640))
-
-
-emb1 = get_face_embedding(fa, "person1.webp")
-emb2 = get_face_embedding(fa, "person2.webp")
-
-
-euclidean_distance = np.linalg.norm(emb1 - emb2)
-cosine_score = cosine_similarity(emb1, emb2)
-
-print("=" * 50)
-print("FACE COMPARISON")
-print("=" * 50)
-print(f"Cosine Similarity : {cosine_score:.4f}")
-print(f"Euclidean Distance: {euclidean_distance:.4f}")
-
-
-if cosine_score >= 0.75:
-    print("Match Confidence : Very High")
-elif cosine_score >= 0.65:
-    print("Match Confidence : High")
-elif cosine_score >= 0.55:
-    print("Match Confidence : Medium")
-else:
-    print("Match Confidence : Low / Different Person")
+if __name__ == "__main__":
+    main()

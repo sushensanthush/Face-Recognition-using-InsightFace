@@ -10,10 +10,10 @@ from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk, ImageDraw
 from tkinterdnd2 import DND_FILES, TkinterDnD
 
-# Ignore layout future warnings from scikit-image to keep terminal clean
+
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-# Configure logging
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 class FaceVerifierApp:
@@ -35,7 +35,7 @@ class FaceVerifierApp:
     def initialize_backend(self):
         logging.info("Initializing FaceAnalysis Architecture...")
         try:
-            # Force CPU execution explicitly to bypass ONNX provider warnings if needed
+         
             self.fa = FaceAnalysis(name="buffalo_l", providers=['CPUExecutionProvider'])
             self.fa.prepare(ctx_id=0, det_size=(640, 640)) 
             logging.info("InsightFace backend optimized successfully.")
@@ -51,7 +51,7 @@ class FaceVerifierApp:
         return img
 
     def build_ui(self):
-        # 1. Top Navigation Banner Panel
+        
         header_frame = tk.Frame(self.root, bg="#1E1E1E", height=90)
         header_frame.pack(fill=tk.X, side=tk.TOP)
         header_frame.pack_propagate(False)
@@ -77,14 +77,14 @@ class FaceVerifierApp:
         )
         subtitle_label.place(x=30, y=52)
 
-        # 2. Main Workspace Display Grid
+     
         self.workspace = tk.Frame(self.root, bg="#121212")
         self.workspace.pack(fill=tk.BOTH, expand=True, padx=30, pady=25)
 
         self.canvas1, self.bg_img1 = self.create_drop_slot("VECTOR MATRIX SOURCE A", 0)
         self.canvas2, self.bg_img2 = self.create_drop_slot("VECTOR MATRIX SOURCE B", 1)
 
-        # 3. Analytics Control Footer Frame
+    
         footer_frame = tk.Frame(self.root, bg="#1E1E1E", height=110)
         footer_frame.pack(fill=tk.X, side=tk.BOTTOM)
         footer_frame.pack_propagate(False)
@@ -92,7 +92,7 @@ class FaceVerifierApp:
         footer_border = tk.Frame(self.root, bg="#2C2C2C", height=1)
         footer_border.place(x=0, y=489)
 
-        # Modern Action Button
+     
         self.compare_btn = tk.Button(
             footer_frame, 
             text="VERIFY IDENTITY", 
@@ -109,11 +109,11 @@ class FaceVerifierApp:
         )
         self.compare_btn.pack(side=tk.RIGHT, padx=30, pady=32)
 
-        # Content Metrics Visual Panel
+     
         self.result_lbl = tk.Label(footer_frame, text="READY FOR VERIFICATION", font=("Segoe UI", 13, "bold"), fg="#8E8E93", bg="#1E1E1E")
         self.result_lbl.pack(side=tk.LEFT, anchor=tk.W, padx=30, pady=25)
         
-        # FIXED: Font size changed from 9.5 to 9 integer to prevent TclError
+      
         self.metrics_lbl = tk.Label(footer_frame, text="Please input system data metrics to compute identity match scores.", font=("Segoe UI", 9), fg="#636366", bg="#1E1E1E")
         self.metrics_lbl.place(x=30, y=60)
 
@@ -217,7 +217,7 @@ class FaceVerifierApp:
         faces = sorted(faces, key=lambda x: (x.bbox[2] - x.bbox[0]) * (x.bbox[3] - x.bbox[1]), reverse=True)
         raw_embedding = faces[0].embedding
         
-        # L2 Normalization for highest comparison metric accuracy
+       
         norm = np.linalg.norm(raw_embedding)
         if norm == 0: return raw_embedding
         return raw_embedding / norm
